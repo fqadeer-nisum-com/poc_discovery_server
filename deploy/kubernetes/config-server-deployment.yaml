@@ -1,0 +1,56 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: config-server
+  namespace: default
+  labels:
+    name: config-server
+    service: config-server-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: config-server
+      type: backend
+  template:
+    metadata:
+      labels:
+        name: config-server
+        type: backend
+    spec:
+      containers:
+      - name: config-server
+        image: nisumpk/config_server
+        ports:
+        - containerPort: 8001
+        env:
+        - name: MY_POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: GIT_CONFIG_DIRECTORY
+          value: "-Dspring.cloud.config.server.git.searchPaths: cloudstack"
+        - name: SERVER_PORT
+          value: "-Dserver.port=8001"
+        - name: DISCOVERY_SERVER_URL
+          value: "-Deureka.client.serviceUrl.defaultZone=http://discovery-server-service.default.svc.cluster.local:7001/eureka/"
+        command: ["java"]
+        args: ["$(SERVER_PORT)", "$(DISCOVERY_SERVER_URL)", "$(GIT_CONFIG_DIRECTORY)", "-Deureka.instance.preferIpAddress=true", "-Deureka.instance.ipAddress=$(MY_POD_IP)", "-jar", "/usr/src/config-server-SNAPSHOT.jar"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: config-server-service
+  namespace: default
+  labels:
+    name: config-server-service
+spec:
+  type: NodePort
+  ports:
+  - port: 8001
+    nodePort: 30002
+    targetPort: 8001
+    protocol: TCP
+
+  selector:
+    name: config-server

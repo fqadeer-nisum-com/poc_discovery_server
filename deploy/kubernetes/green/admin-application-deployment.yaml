@@ -1,0 +1,56 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: green-admin-application
+  namespace: green
+  labels:
+    name: green-admin-application
+    service: green-admin-application-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: green-admin-application
+      type: frontend
+  template:
+    metadata:
+      labels:
+        name: green-admin-application
+        type: frontend
+    spec:
+      containers:
+      - name: green-admin-application
+        image: nisumpk/admin_application
+        ports:
+        - containerPort: 9401
+        env:
+        - name: MY_POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: SERVER_PORT
+          value: -Dserver.port=9401
+        - name: BIZ_APPLICATION_URL
+          value: -Dbiz.application.url=http://green-biz-application-service.green.svc.cluster.local:9601
+        - name: DISCOVERY_SERVER_URL
+          value: "-Deureka.client.serviceUrl.defaultZone=http://green-discovery-server-service.green.svc.cluster.local:7001/eureka/"
+        command: ["java"]
+        args: ["$(SERVER_PORT)", "$(DISCOVERY_SERVER_URL)", "$(BIZ_APPLICATION_URL)", "-Deureka.instance.preferIpAddress=true", "-Deureka.instance.ipAddress=$(MY_POD_IP)", "-jar", "/usr/src/admin-application-SNAPSHOT.jar"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: green-admin-application-service
+  namespace: green
+  labels:
+    name: green-admin-application-service
+spec:
+  type: NodePort
+  ports:
+  - port: 9401
+    nodePort: 31004
+    targetPort: 9401
+    protocol: TCP
+
+  selector:
+    name: green-admin-application
