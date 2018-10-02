@@ -48,7 +48,7 @@ pipeline {
                 sh script: "cp ${WORKSPACE}/target/" + app.appName + "*SNAPSHOT.jar ${WORKSPACE}/install/deploy/docker/" + app.appName.replaceAll("-", "_") + "/"
 
                 /* Building docker image */
-                docker.build(registry + "/" + app.appName, "-f ${WORKSPACE}/install/deploy/docker/" + app.appName.replaceAll("-", "_") + "/Dockerfile ${WORKSPACE}/install/deploy/docker")
+                docker.build(registry + "/" + app.appName.replaceAll("-", "_"), "-f ${WORKSPACE}/install/deploy/docker/" + app.appName.replaceAll("-", "_") + "/Dockerfile ${WORKSPACE}/install/deploy/docker")
         }
       }
     }
