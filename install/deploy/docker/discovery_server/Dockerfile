@@ -7,7 +7,7 @@ ENV JAR_FILE=discovery-server-SNAPSHOT.jar
 
 
 # Copy all the required files/directories
-COPY ${APP_NAME}/${JAR_FILE} /usr/src/${JAR_FILE}
+COPY ${APP_NAME}/*.jar /usr/src/${JAR_FILE}
 
 # Startup Command
 ENTRYPOINT java -Dserver.port=${SERVER_PORT} -Deureka.instance.preferIpAddress=true -jar /usr/src/${JAR_FILE}
