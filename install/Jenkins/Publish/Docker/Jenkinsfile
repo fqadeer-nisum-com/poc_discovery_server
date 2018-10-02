@@ -22,7 +22,7 @@ pipeline {
         /* Git checkout */
         /*steps {
             checkout([$class: 'GitSCM',
-            branches: [[name: '*/master']],
+            branches: [[name: '/master']],
             doGenerateSubmoduleConfigurations: false,
             extensions: [[$class: 'CleanCheckout']],
             submoduleCfg: [],
