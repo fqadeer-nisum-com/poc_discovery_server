@@ -17,7 +17,7 @@ spec:
       labels:
         name: discovery-server
         type: backend
-        version:
+        version: 1
         deploymentType: BLUE
     spec:
       containers:
