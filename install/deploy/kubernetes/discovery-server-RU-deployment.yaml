@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ru-deployment
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: discovery-server
+  namespace: ru-deployment
+  labels:
+    name: discovery-server
+    service: discovery-server-service
+spec:
+  replicas: 2
+  minReadySeconds: 15
+  selector:
+    matchLabels:
+      name: discovery-server
+      type: backend
+  strategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxUnavailable: 1
+          maxSurge: 1
+  template:
+    metadata:
+      labels:
+        name: discovery-server
+        type: backend
+    spec:
+      containers:
+      - name: discovery-server
+        image: nisumpk/discovery_server:efe4fa8_5
+        ports:
+        - containerPort: 7001
+        env:
+        - name: SERVER_PORT
+          value: -Dserver.port=7001
+        command: ["java"]
+        args: ["$(SERVER_PORT)", "-Deureka.instance.preferIpAddress=true", "-Deureka.instance.prefer-ip-address=true" , "-jar", "/usr/src/discovery-server-SNAPSHOT.jar"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: discovery-server-service
+  namespace: ru-deployment
+  labels:
+    name: discovery-server-service
+spec:
+  type: NodePort
+  ports:
+  - port: 7001
+    nodePort: 30050
+    targetPort: 7001
+    protocol: TCP
+
+  selector:
+    name: discovery-server
