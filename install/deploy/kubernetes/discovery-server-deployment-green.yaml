@@ -2,7 +2,7 @@ apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: discovery-server-green
-  namespace: default
+  namespace: devopspoc
   labels:
     name: discovery-server
     service: discovery-server-service
