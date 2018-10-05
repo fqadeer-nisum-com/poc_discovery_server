@@ -39,6 +39,22 @@ spec:
           value: -Dserver.port=7001
         command: ["java"]
         args: ["$(SERVER_PORT)", "-Deureka.instance.preferIpAddress=true", "-Deureka.instance.prefer-ip-address=true" , "-jar", "/usr/src/discovery-server-SNAPSHOT.jar"]
+        readinessProbe:
+          httpGet:
+            path: /
+            host: 127.0.0.1
+            port: 30050
+            scheme: HTTP
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          timeoutSeconds: 1
+        livenessProbe:
+           tcpSocket:
+             port: 30050
+             host: 127.0.0.1
+           initialDelaySeconds: 15
+           periodSeconds: 20
+
 ---
 apiVersion: v1
 kind: Service
