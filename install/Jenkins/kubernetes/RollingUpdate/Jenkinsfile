@@ -30,7 +30,7 @@ pipeline {
 		}
 		stage('Build Application') {
 			steps{
-				sh "kubectl apply -f ${env.k8configPath}" + "/" + "${env.configFile}"
+				sh "kubectl apply -f ${env.k8configPath}/${env.configFile}"
 			}
 		}
     }
