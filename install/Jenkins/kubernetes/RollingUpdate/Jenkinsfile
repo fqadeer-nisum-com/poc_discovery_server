@@ -15,7 +15,7 @@ pipeline {
 		stage('Clone Repo') {
 			steps {
 				checkout scm
-			/
+			}
 			/*steps {
 			    	checkout([$class: 'GitSCM',
 					branches: [[name: '/master']],
