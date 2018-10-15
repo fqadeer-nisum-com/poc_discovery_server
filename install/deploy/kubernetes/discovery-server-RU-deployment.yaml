@@ -12,7 +12,8 @@ metadata:
     name: discovery-server
     service: discovery-server-service
 spec:
-  replicas: 1
+  replicas: 2
+  minReadySeconds: 15
   selector:
     matchLabels:
       name: discovery-server
