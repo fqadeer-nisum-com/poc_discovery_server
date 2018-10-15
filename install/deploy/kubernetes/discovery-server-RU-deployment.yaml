@@ -6,28 +6,24 @@ metadata:
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: discovery-server
-  namespace: ru-deployment
+  name: discovery-server-green
+  namespace: devopspoc
   labels:
     name: discovery-server
     service: discovery-server-service
 spec:
-  replicas: 2
-  minReadySeconds: 15
+  replicas: 1
   selector:
     matchLabels:
       name: discovery-server
       type: backend
-  strategy:
-        type: RollingUpdate
-        rollingUpdate:
-          maxUnavailable: 1
-          maxSurge: 1
   template:
     metadata:
       labels:
         name: discovery-server
         type: backend
+        version: "1"
+        deploymentType: GREEN
     spec:
       containers:
       - name: discovery-server
@@ -38,7 +34,7 @@ spec:
         - name: SERVER_PORT
           value: -Dserver.port=7001
         command: ["java"]
-        args: ["$(SERVER_PORT)", "-Deureka.instance.preferIpAddress=true", "-Deureka.instance.prefer-ip-address=true" , "-jar", "/usr/src/discovery-server-SNAPSHOT.jar"]
+        args: ["$(SERVER_PORT)", "-Deureka.instance.preferIpAddress=true", "-jar", "/usr/src/discovery-server-SNAPSHOT.jar"]
         readinessProbe:
           httpGet:
             path: /
