@@ -6,7 +6,7 @@ metadata:
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: discovery-server-green
+  name: discovery-server
   namespace: ru-deployment
   labels:
     name: discovery-server
@@ -22,8 +22,6 @@ spec:
       labels:
         name: discovery-server
         type: backend
-        version: "1"
-        deploymentType: GREEN
     spec:
       containers:
       - name: discovery-server
