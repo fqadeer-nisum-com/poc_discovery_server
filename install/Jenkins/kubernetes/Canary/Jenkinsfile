@@ -30,7 +30,7 @@ def getNameSpace(nsConfigPath){
 }
 
 def applyK8Config(configPath){
-    sh (returnStatus: true, script: "kubectl apply -f ${configPath}")
+    sh (returnStatus: true, script: "istioctl kube-inject -f ${configPath} | kubectl apply -f -")
 }
 
 def deleteK8Config(configPath) {
