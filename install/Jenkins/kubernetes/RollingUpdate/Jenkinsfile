@@ -1,10 +1,15 @@
+import groovy.json.JsonSlurper
+
+
+def list
+
 def DeploymentStatus(namespace, app) {
     for (int i=0; i <= 40 ; i++){
         script {
             podStatus = sh (script: "kubectl rollout status -n " + namespace + " deployment " + appName + " --watch=false &> value.txt")
             getValue = readFile('value.txt').trim()
             println (i) + "Seconds"
-           // if (getValue.toLowerCase().equals("successfully".toLowerCase())) {
+            // if (getValue.toLowerCase().equals("successfully".toLowerCase())) {
             if (getValue.toLowerCase().contains("successfully".toLowerCase())) {
                 println "Deployment Sucessfull"
                 //break;
@@ -14,16 +19,26 @@ def DeploymentStatus(namespace, app) {
             sleep 1;
         }
     }
-     if (!getValue.toLowerCase().contains("successfully".toLowerCase())) {
-                    println "Deployment UnSucessfull"
-                    throw new hudson.AbortException('Deployment Unsuccesfull!')
-                }
+    if (!getValue.toLowerCase().contains("successfully".toLowerCase())) {
+        println "Deployment UnSucessfull"
+        throw new hudson.AbortException('Deployment Unsuccesfull!')
+    }
 
 }
 
+node{
+    URL apiUrl = new URL("https://hub.docker.com/v2/repositories/nisumpk/discovery_server/tags/?page_size=1024")
+    def json = new JsonSlurper().parseText(apiUrl.text)
+    def tags = json.results.name
+    list = tags.join('\n')
+
+    println "test   " + tags
+}
+
+
 pipeline {
 
-    agent { label "k8-master" }
+    agent { label "K8-Master" }
 
     environment {
 
@@ -32,16 +47,22 @@ pipeline {
             /* Do not change below this line! */
             k8configPath = "${WORKSPACE}/install/deploy/kubernetes"
             configFile = "discovery-server-RU-deployment.yaml"
+
+    }
+
+    parameters {
+        //choice(name: 'Invoke_Parameters', choices:"Yes\nNo", description: "Do you whish to do a dry run to grab parameters?" )
+        choice(choices: "${list}", description: 'Available Docker Images', name: 'SelectedImage')
     }
 
     stages {
 		stage('Clone Repo') {
+			//steps {
+			//	checkout scm
+			//}
 			steps {
-				checkout scm
-			}
-			/*steps {
 			    	checkout([$class: 'GitSCM',
-					branches: [[name: '/master']],
+					branches: [[name: '*/master']],
 					doGenerateSubmoduleConfigurations: false,
 					extensions: [[$class: 'CleanCheckout']],
 					submoduleCfg: [],
@@ -49,9 +70,19 @@ pipeline {
 					userRemoteConfigs: [[credentialsId:'10dc7c72-ff75-4986-8001-6da6b3a917bb', url: 'https://github.com/nisum-inc/POC_Discovery_Server.git']]
 
 				])
-			}*/
+			}
 		}
-		stage('Build Application') {
+        stage('chooseDockerTags') {
+            steps{
+                script{
+
+                    println " Chosen Docker Image Version  === ${params.SelectedImage}"
+                    def sedCommand = sh "sed -i \'s/nisumpk\\/discovery_server/nisumpk\\/discovery_server:${params.SelectedImage}/\' ${ env.k8configPath}/${env.configFile}"
+                }
+            }
+
+        }
+        stage('Build Application') {
 			steps{
 				sh "kubectl apply -f ${env.k8configPath}/${env.configFile}"
 			}
