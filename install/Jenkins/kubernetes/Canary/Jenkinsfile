@@ -1,26 +1,3 @@
-def deployingValue = ''
-
-def currentDeployingValue(namespace, blue, green, app) {
-        script {
-            podStatus = sh (returnStatus: true, script: "kubectl describe svc " + app + "-service -n " + namespace + "| grep -i Selector | cut -d'=' -f2 | cut -d',' -f1 &> value.txt")
-            getValue = readFile('value.txt').trim()
-
-            if (getValue.toLowerCase().equals(blue.toLowerCase())) {
-                println "Currently " + getValue + " " + app + " is running!"
-                deployingValue = green
-            } else if (getValue.toLowerCase().equals(green.toLowerCase())) {
-                println "Currently " + getValue + " " + app + " is running!"
-                deployingValue = blue
-            } else {
-                println "The application " + app + " is not running, now deploying app for blue by default!"
-                deployingValue = 'blue'
-            }
-
-            println "Now deploying " + deployingValue.toUpperCase() + "!"
-            deployingValue
-        }
-}
-
 def getNameSpace(nsConfigPath){
 
     def NS=sh (returnStatus: true, script: "grep -i name: " + nsConfigPath + " |head -n1| cut -d':' -f2 &> namespace.txt")
@@ -29,8 +6,12 @@ def getNameSpace(nsConfigPath){
     output
 }
 
-def applyK8Config(configPath){
+def applyK8ConfigWithIstio(configPath){
     sh (returnStatus: true, script: "${ISTIO_HOME}/bin/istioctl kube-inject -f ${configPath} | kubectl apply -f -")
+}
+
+def applyK8Config(configPath){
+    sh (returnStatus: true, script: "kubectl apply -f ${configPath}")
 }
 
 def deleteK8Config(configPath) {
@@ -81,19 +62,16 @@ pipeline {
                 switchTo = currentDeployingValue(env.namespace, "blue", "green", env.appName).toLowerCase()
             }*/
 		    steps {
-                applyK8Config(env.k8configPath + "/" + env.appName + "-deployment-" + env.namespace + ".yaml")
+                applyK8ConfigWithIstio(env.k8configPath + "/" + env.appName + "-deployment-" + env.namespace + ".yaml")
 
         	}
         }
-        /*stage('Switch Deployment'){
-		    environment {
-                switchTo = currentDeployingValue(env.namespace, "blue", "green", env.appName).toLowerCase()
-            }
-            steps {
+        stage('Deploy Service Mesh'){
+		    steps {
                 script {
-                    applyK8Config(env.k8configPath + "/" + env.appName + "-service-" + env.switchTo + ".yaml")
+                    applyK8Config(env.k8configPath + "/" + env.appName + "-servicemesh-" + env.namespace + ".yaml")
                 }
             }
-        }*/
+        }
     }
 }
