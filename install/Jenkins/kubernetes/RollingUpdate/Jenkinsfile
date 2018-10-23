@@ -42,11 +42,11 @@ pipeline {
 
     environment {
 
-            appName = 'discovery-server'
-            nameSpace = 'ru-deployment'
-            /* Do not change below this line! */
-            k8configPath = "${WORKSPACE}/install/deploy/kubernetes"
-            configFile = "discovery-server-RU-deployment.yaml"
+        appName = 'discovery-server'
+        nameSpace = 'ru-deployment'
+        /* Do not change below this line! */
+        k8configPath = "${WORKSPACE}/install/deploy/kubernetes"
+        configFile = "discovery-server-RU-deployment.yaml"
 
     }
 
@@ -56,22 +56,22 @@ pipeline {
     }
 
     stages {
-		stage('Clone Repo') {
-			//steps {
-			//	checkout scm
-			//}
-			steps {
-			    	checkout([$class: 'GitSCM',
-					branches: [[name: '*/master']],
-					doGenerateSubmoduleConfigurations: false,
-					extensions: [[$class: 'CleanCheckout']],
-					submoduleCfg: [],
-					//userRemoteConfigs: [[credentialsId: 'b2ed5912-90f0-40fb-8f98-a35933a55f30', url: 'https://github.com/nisum-inc/POC_Discovery_Server.git']]
-					userRemoteConfigs: [[credentialsId:'10dc7c72-ff75-4986-8001-6da6b3a917bb', url: 'https://github.com/nisum-inc/POC_Discovery_Server.git']]
+        stage('Clone Repo') {
+            //steps {
+            //	checkout scm
+            //}
+            steps {
+                checkout([$class: 'GitSCM',
+                          branches: [[name: '*/master']],
+                          doGenerateSubmoduleConfigurations: false,
+                          extensions: [[$class: 'CleanCheckout']],
+                          submoduleCfg: [],
+                          //userRemoteConfigs: [[credentialsId: 'b2ed5912-90f0-40fb-8f98-a35933a55f30', url: 'https://github.com/nisum-inc/POC_Discovery_Server.git']]
+                          userRemoteConfigs: [[credentialsId:'10dc7c72-ff75-4986-8001-6da6b3a917bb', url: 'https://github.com/nisum-inc/POC_Discovery_Server.git']]
 
-				])
-			}
-		}
+                ])
+            }
+        }
         stage('chooseDockerTags') {
             steps{
                 script{
@@ -83,18 +83,18 @@ pipeline {
 
         }
         stage('Build Application') {
-			steps{
-				sh "kubectl apply -f ${env.k8configPath}/${env.configFile}"
-			}
-		}
-		stage('Check Status') {
-        			steps{
-        			    script{
-        			        DeploymentStatus("${env.nameSpace}", "${env.appName}")
-        			    }
+            steps{
+                sh "kubectl apply -f ${env.k8configPath}/${env.configFile}"
+            }
+        }
+        stage('Check Status') {
+            steps{
+                script{
+                    DeploymentStatus("${env.nameSpace}", "${env.appName}")
+                }
 
-        				//sh "kubectl rollout status -n ${env.nameSpace} deployment ${env.appName}"
-        			}
-		}
+                //sh "kubectl rollout status -n ${env.nameSpace} deployment ${env.appName}"
+            }
+        }
     }
 }
