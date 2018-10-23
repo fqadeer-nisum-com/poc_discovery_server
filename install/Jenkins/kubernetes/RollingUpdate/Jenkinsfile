@@ -59,7 +59,7 @@ pipeline {
     stages {
         stage('Clone Repo') {
             steps {
-            	checkout scm
+                checkout scm
             }
             /* steps {
                 checkout([$class: 'GitSCM',
@@ -70,27 +70,27 @@ pipeline {
                           //userRemoteConfigs: [[credentialsId: 'b2ed5912-90f0-40fb-8f98-a35933a55f30', url: 'https://github.com/nisum-inc/POC_Discovery_Server.git']]
                           userRemoteConfigs: [[credentialsId:'10dc7c72-ff75-4986-8001-6da6b3a917bb', url: 'https://github.com/nisum-inc/POC_Discovery_Server.git']]
 
-                ])*/
-            }
+                ])
+            }*/
         }
         stage('chooseDockerTags') {
-            steps{
-                script{
+            steps {
+                script {
 
                     println " Chosen Docker Image Version  === ${params.SelectedImage}"
-                    def sedCommand = sh "sed -i \'s/nisumpk\\/discovery_server/nisumpk\\/discovery_server:${params.SelectedImage}/\' ${ env.k8configPath}/${env.configFile}"
+                    def sedCommand = sh "sed -i \'s/nisumpk\\/discovery_server/nisumpk\\/discovery_server:${params.SelectedImage}/\' ${env.k8configPath}/${env.configFile}"
                 }
             }
 
         }
         stage('Build Application') {
-            steps{
+            steps {
                 sh "kubectl apply -f ${env.k8configPath}/${env.configFile}"
             }
         }
         stage('Check Status') {
-            steps{
-                script{
+            steps {
+                script {
                     DeploymentStatus("${env.nameSpace}", "${env.appName}")
                 }
 
@@ -98,3 +98,4 @@ pipeline {
             }
         }
     }
+}
