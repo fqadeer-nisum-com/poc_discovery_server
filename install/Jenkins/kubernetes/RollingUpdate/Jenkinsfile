@@ -57,19 +57,19 @@ pipeline {
 
     stages {
         stage('Clone Repo') {
-            //steps {
-            //	checkout scm
-            //}
             steps {
+            	checkout scm
+            }
+            /* steps {
                 checkout([$class: 'GitSCM',
-                          branches: [[name: '*/master']],
+                          branches: [[name: '/master']],
                           doGenerateSubmoduleConfigurations: false,
                           extensions: [[$class: 'CleanCheckout']],
                           submoduleCfg: [],
                           //userRemoteConfigs: [[credentialsId: 'b2ed5912-90f0-40fb-8f98-a35933a55f30', url: 'https://github.com/nisum-inc/POC_Discovery_Server.git']]
                           userRemoteConfigs: [[credentialsId:'10dc7c72-ff75-4986-8001-6da6b3a917bb', url: 'https://github.com/nisum-inc/POC_Discovery_Server.git']]
 
-                ])
+                ])*/
             }
         }
         stage('chooseDockerTags') {
