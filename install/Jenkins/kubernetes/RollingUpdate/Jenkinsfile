@@ -21,7 +21,8 @@ def DeploymentStatus(namespace, app) {
     }
     if (!getValue.toLowerCase().contains("successfully".toLowerCase())) {
         println "Deployment UnSucessfull"
-        throw new hudson.AbortException('Deployment Unsuccesfull!')
+        sh (script: "kubecth rollout undo -n " + namespace + " deployment " + appName)
+        throw new hudson.AbortException('Deployment Rollback to previous Version!')
     }
 
 }
@@ -97,4 +98,3 @@ pipeline {
             }
         }
     }
-}
