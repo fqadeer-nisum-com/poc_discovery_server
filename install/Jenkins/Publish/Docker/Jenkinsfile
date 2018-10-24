@@ -9,8 +9,6 @@ pipeline {
     dockerHost = 'localhost'
   }
 
-  agent { label 'docker-host' }
-
   stages {
     stage('Clone Application') {
 
@@ -19,17 +17,6 @@ pipeline {
             checkout scm
         }
 
-        /* Git checkout */
-        /*steps {
-            checkout([$class: 'GitSCM',
-            branches: [[name: '/master']],
-            doGenerateSubmoduleConfigurations: false,
-            extensions: [[$class: 'CleanCheckout']],
-            submoduleCfg: [],
-            userRemoteConfigs: [[credentialsId: 'b2ed5912-90f0-40fb-8f98-a35933a55f30', url: 'https://github.com/nisum-inc/POC_Discovery_Server.git']]
-            //userRemoteConfigs: [[credentialsId: '16e9c02e-8b5a-41de-b05e-5c0ac770dc97', url: 'https://github.com/nisum-inc/POC_Discovery_Server.git']]
-            ])
-        }*/
     }
     stage('Build Application') {
     	/* this is temporary step, ideally jar file should be downloaded from any artifact server. */
