@@ -8,6 +8,8 @@ pipeline {
     registryCredential = 'docker-hub-credentials'
     dockerHost = 'localhost'
   }
+  
+  agent any
 
   stages {
     stage('Clone Application') {
