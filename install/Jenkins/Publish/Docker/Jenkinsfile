@@ -10,6 +10,10 @@ pipeline {
   }
   
   agent any
+  
+  tools {
+    maven 'apache-maven' 
+  }
 
   stages {
     stage('Clone Application') {
@@ -23,7 +27,7 @@ pipeline {
     stage('Build Application') {
     	/* this is temporary step, ideally jar file should be downloaded from any artifact server. */
     	steps {
-    		sh "cd ${WORKSPACE} && ${MAVEN_HOME}/bin/mvn -Dmaven.test.failure.ignore -Dmaven.test.skip=true clean package"
+    		sh "cd ${WORKSPACE} && mvn -Dmaven.test.failure.ignore -Dmaven.test.skip=true clean package"
     	}
     }
 
