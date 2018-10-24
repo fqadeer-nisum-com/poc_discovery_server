@@ -16,6 +16,7 @@ pipeline {
   }
 
   stages {
+
     stage('Clone Application') {
 
         /* Git checkout using declarative method 'scm' */
@@ -23,16 +24,21 @@ pipeline {
             checkout scm
         }
 
-    }
+    } // end of stage
+
     stage('Build Application') {
+
     	/* this is temporary step, ideally jar file should be downloaded from any artifact server. */
     	steps {
     		sh "cd ${WORKSPACE} && mvn -Dmaven.test.failure.ignore -Dmaven.test.skip=true clean package"
     	}
-    }
+
+    } // end of stage
 
     stage('Building Images') {
-      steps{
+
+      steps {
+
         script {
                 //def application = """${app}"""
                 //application = application.replaceAll("_", "-")
@@ -43,11 +49,15 @@ pipeline {
                 /* Building docker image */
                 docker.build(registry + "/" + app.appName.replaceAll("-", "_"), "-f ${WORKSPACE}/install/deploy/docker/" + app.appName.replaceAll("-", "_") + "/Dockerfile ${WORKSPACE}/install/deploy/docker")
         }
+
       }
-    }
+
+    } // end of stage
 
     stage('Tagging Images') {
-        steps{
+
+        steps {
+
             script {
 
                 commit= sh (returnStatus: true, script: "git log -1 --pretty=%h > gitOutput.txt")
@@ -57,10 +67,13 @@ pipeline {
                 sh script: "docker tag " + registry + "/" + app.appName.replaceAll("-", "_") + ":latest " + registry + "/" + app.appName.replaceAll("-", "_") + ":" + gitStatus + "_$BUILD_NUMBER"
             }
         }
-    }
+    } // end of stage
+
     stage('Push Images To Docker-Hub') {
-       steps{
-           script{
+
+       steps {
+
+           script {
 
                commit= sh (returnStatus: true, script: "git log -1 --pretty=%h > gitOutput.txt")
                gitStatus = readFile('gitOutput.txt').trim()
@@ -75,7 +88,19 @@ pipeline {
                     sh "docker logout"
                }
            }
+
        }
-    }
-  }
-}
+
+    } // end of stage
+
+    stage('Trigger Blue/Green Deployment') {
+
+      steps {
+        build job: '/DevOpsPOC_BlueGreen_Deploy_DiscoverySVR'
+      }
+
+    } // end of stage
+
+  } // end of all stages
+
+} // end of pipeline
