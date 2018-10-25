@@ -74,7 +74,7 @@ pipeline {
                 gitStatus = readFile('gitOutput.txt').trim()
                 ver = readFile('version.txt').trim()
                 /* Assigning tag as Jenkins git pretty name and Build_Number for tracking pupose */
-                sh script: "docker tag " + registry + "/" + app.appName.replaceAll("-", "_") + ":latest " + registry + "/" + app.appName.replaceAll("-", "_") + ":" + ver + ".BUILD#$BUILD_NUMBER." + gitStatus
+                sh script: "docker tag " + registry + "/" + app.appName.replaceAll("-", "_") + ":latest " + registry + "/" + app.appName.replaceAll("-", "_") + ":" + ver + ".BUILD_$BUILD_NUMBER." + gitStatus
             }
         }
     } // end of stage
@@ -92,7 +92,7 @@ pipeline {
                    /* Uploading image to docker hub using docker cli */
                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.registryCredential}",
                    usernameVariable: 'dockerUser', passwordVariable: 'dockerPassword']]) {
-                      sh "docker login -u$dockerUser -p$dockerPassword; docker push ${env.registry}/" + app.appName.replaceAll("-", "_") + ":" + ver + ".BUILD#$BUILD_NUMBER." + gitStatus + ";docker push ${env.registry}/" + app.appName.replaceAll("-", "_") + ":latest"
+                      sh "docker login -u$dockerUser -p$dockerPassword; docker push ${env.registry}/" + app.appName.replaceAll("-", "_") + ":" + ver + ".BUILD_$BUILD_NUMBER." + gitStatus + ";docker push ${env.registry}/" + app.appName.replaceAll("-", "_") + ":latest"
                    }
                } finally {
                     /* logging out docker account */
