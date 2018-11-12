@@ -7,7 +7,7 @@ def getNameSpace(nsConfigPath){
 }
 
 def applyK8ConfigWithIstio(configPath){
-    sh (returnStatus: true, script: "${ISTIO_HOME}/bin/istioctl kube-inject -f ${configPath} | kubectl apply -f -")
+    sh (returnStatus: true, script: "istioctl kube-inject -f ${configPath} | kubectl apply -f -")
 }
 
 def applyK8Config(configPath){
