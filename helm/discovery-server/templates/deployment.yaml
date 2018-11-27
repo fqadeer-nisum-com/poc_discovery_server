@@ -1,0 +1,24 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ include "discovery_server.fullname" . }}
+  namespace: {{ .Values.service.namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "discovery_server.name" . }}
+        version: {{ .Chart.Version }}
+    spec:
+      containers:
+      - name: {{ include "discovery_server.name" . }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        ports:
+        - containerPort: {{ .Values.service.port }}
+        env:
+        - name: SERVER_PORT
+          value: -Dserver.port={{ .Values.service.port }}
+        command: ["java"]
+        args: ["$(SERVER_PORT)", "-Deureka.server.maxThreadsForPeerReplication=0", "-Deureka.client.serviceUrl=http://{{ include "discovery_server.fullname" . }}:{{ .Values.service.port }}/eureka/", "-jar", "/usr/src/discovery-server-SNAPSHOT.jar"]
+
