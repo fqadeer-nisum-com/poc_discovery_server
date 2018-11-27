@@ -1,0 +1,32 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "discovery-server.name" . }}-{{ .Values.deploymentType }}
+  namespace: {{ .Values.service.namespace }}
+  labels:
+    name: {{ include "discovery-server.name" . }}
+    service: {{ .Values.service.name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      name: {{ include "discovery-server.name" . }}
+      type: backend
+  template:
+    metadata:
+      labels:
+        name: {{ include "discovery-server.name" . }}
+        type: backend
+        version: {{ .Chart.Version }}
+        deploymentType: {{ .Values.deploymentType }}
+    spec:
+      containers:
+      - name: {{ include "discovery-server.name" . }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        ports:
+        - containerPort: {{ .Values.service.port }}
+        env:
+        - name: SERVER_PORT
+          value: -Dserver.port={{ .Values.service.port }}
+        command: ["java"]
+        args: ["$(SERVER_PORT)", "-jar", "/usr/src/discovery-server-SNAPSHOT.jar"]
