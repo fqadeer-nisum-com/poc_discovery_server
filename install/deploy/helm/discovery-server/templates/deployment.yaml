@@ -1,18 +1,27 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: {{ include "discovery_server.fullname" . }}
+  name: {{ include "discovery-server.name" . }}-{{ .Values.deploymentType }}
   namespace: {{ .Values.service.namespace }}
+  labels:
+    name: {{ include "discovery-server.name" . }}
+    service: {{ .Values.service.name }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      name: {{ include "discovery-server.name" . }}
+      type: backend
   template:
     metadata:
       labels:
-        app: {{ include "discovery_server.name" . }}
+        name: {{ include "discovery-server.name" . }}
+        type: backend
         version: {{ .Chart.Version }}
+        deploymentType: {{ .Values.deploymentType }}
     spec:
       containers:
-      - name: {{ include "discovery_server.name" . }}
+      - name: {{ include "discovery-server.name" . }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         ports:
         - containerPort: {{ .Values.service.port }}
@@ -20,5 +29,4 @@ spec:
         - name: SERVER_PORT
           value: -Dserver.port={{ .Values.service.port }}
         command: ["java"]
-        args: ["$(SERVER_PORT)", "-Deureka.server.maxThreadsForPeerReplication=0", "-Deureka.client.serviceUrl=http://{{ include "discovery_server.fullname" . }}:{{ .Values.service.port }}/eureka/", "-jar", "/usr/src/discovery-server-SNAPSHOT.jar"]
-
+        args: ["$(SERVER_PORT)", "-jar", "/usr/src/discovery-server-SNAPSHOT.jar"]

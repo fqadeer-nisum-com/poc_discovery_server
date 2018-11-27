@@ -1,13 +1,13 @@
 {{- if .Values.ingress.enabled -}}
-{{- $fullName := include "discovery_server.fullname" . -}}
+{{- $fullName := include "discovery-server.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
-    app.kubernetes.io/name: {{ include "discovery_server.name" . }}
-    helm.sh/chart: {{ include "discovery_server.chart" . }}
+    app.kubernetes.io/name: {{ include "discovery-server.name" . }}
+    helm.sh/chart: {{ include "discovery-server.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- with .Values.ingress.annotations }}

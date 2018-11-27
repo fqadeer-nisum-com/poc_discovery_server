@@ -4,6 +4,8 @@
 
 replicaCount: 1
 
+deploymentType: BLUEGREEN
+
 image:
   repository: nisumpk/discovery_server
   tag: latest

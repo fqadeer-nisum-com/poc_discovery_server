@@ -1,16 +1,18 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "discovery_server.fullname" . }}
+  name: {{ .Values.service.name }}
   namespace: {{ .Values.service.namespace }}
   labels:
-    app: {{ include "discovery_server.name" . }}
+    name: {{ include "discovery-server.name" . }}
 spec:
   type: {{ .Values.service.type }}
   ports:
   - port: {{ .Values.service.port }}
     nodePort: {{ .Values.service.nodePort }}
     targetPort: {{ .Values.service.port }}
-    name: http
+    protocol: TCP
+
   selector:
-    app: {{ include "discovery_server.name" . }}
+    name: {{ include "discovery-server.name" . }}
+    deploymentType: {{ .Values.deploymentType }}
