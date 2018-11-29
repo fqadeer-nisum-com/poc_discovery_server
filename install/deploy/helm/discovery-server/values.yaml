@@ -4,7 +4,7 @@
 
 replicaCount: 1
 
-deploymentType: BLUEGREEN
+deploymentType: blue
 
 application:
   name: discovery-server
