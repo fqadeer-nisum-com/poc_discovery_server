@@ -4,7 +4,7 @@ metadata:
   name: {{ .Values.service.name }}
   namespace: {{ .Values.service.namespace }}
   labels:
-    name: {{ include "discovery-server.name" . }}
+    name: {{ .Values.application.name  }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -14,5 +14,5 @@ spec:
     protocol: TCP
 
   selector:
-    name: {{ include "discovery-server.name" . }}
+    name: {{ .Values.application.name }}
     deploymentType: {{ .Values.deploymentType }}

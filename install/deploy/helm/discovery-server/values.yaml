@@ -6,6 +6,11 @@ replicaCount: 1
 
 deploymentType: BLUEGREEN
 
+application:
+  name: discovery-server
+  jarPath: /usr/src
+  jarName: discovery-server-SNAPSHOT.jar
+
 image:
   repository: nisumpk/discovery_server
   tag: latest
