@@ -104,13 +104,13 @@ pipeline {
 
     } // end of stage
 
-    stage('Trigger Blue/Green Deployment') {
+  /*  stage('Trigger Blue/Green Deployment') {
 
       steps {
         build job: '/DevOpsPOC_BlueGreen_Deploy_DiscoverySVR'
       }
 
-    }  // end of stage
+    }  // end of stage . */ 
 
   } // end of all stages
 
