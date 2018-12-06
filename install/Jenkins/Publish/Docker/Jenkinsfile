@@ -37,18 +37,14 @@ pipeline {
     } // end of stage
 
     stage('Build Application') {
-
     	/* this is temporary step, ideally jar file should be downloaded from any artifact server. */
     	steps {
     		sh "cd ${WORKSPACE} && mvn -Dmaven.test.failure.ignore -Dmaven.test.skip=true clean package"
     	}
-
     } // end of stage
 
     stage('Building Images') {
-
       steps {
-
         script {
                 //def application = """${app}"""
                 //application = application.replaceAll("_", "-")
@@ -59,17 +55,12 @@ pipeline {
                 /* Building docker image */
                 docker.build(registry + "/" + app.appName.replaceAll("-", "_"), "-f ${WORKSPACE}/install/deploy/docker/" + app.appName.replaceAll("-", "_") + "/Dockerfile ${WORKSPACE}/install/deploy/docker")
         }
-
       }
-
-    } // end of stage
+    }
 
     stage('Tagging Images') {
-
         steps {
-
             script {
-
                 commit= sh (returnStatus: true, script: "git log -1 --pretty=%h > gitOutput.txt")
                 gitStatus = readFile('gitOutput.txt').trim()
                 appVersion = readFile('version').trim()
@@ -80,11 +71,8 @@ pipeline {
     } // end of stage
 
     stage('Push Images To Docker-Hub') {
-
        steps {
-
            script {
-
                commit= sh (returnStatus: true, script: "git log -1 --pretty=%h > gitOutput.txt")
                gitStatus = readFile('gitOutput.txt').trim()
                ver = readFile('version').trim()
@@ -99,7 +87,6 @@ pipeline {
                     sh "docker logout"
                }
            }
-
        }
     } // end of stage
 
@@ -136,11 +123,9 @@ pipeline {
     }
 
     /*stage('Trigger Blue/Green Deployment') {
-
-      steps {
-        build job: '/DevOpsPOC_BlueGreen_Deploy_DiscoverySVR'
-      }
-
+          steps {
+            build job: '/DevOpsPOC_BlueGreen_Deploy_DiscoverySVR'
+          }
     } */ // end of stage
 
   } // end of all stages
