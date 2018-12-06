@@ -96,10 +96,10 @@ pipeline {
         }
         steps {
             script {
-                checkout scm
-                //git branch: 'master',
-                //    credentialsId: '10dc7c72-ff75-4986-8001-6da6b3a917bb',
-                //    url: 'https://github.com/nisum-inc/POC_Discovery_Server.git'
+                //checkout scm
+                git branch: 'master',
+                    credentialsId: '10dc7c72-ff75-4986-8001-6da6b3a917bb',
+                    url: 'https://github.com/nisum-inc/POC_Discovery_Server.git'
 
                 commit = sh (returnStatus: true, script: "git log -1 --pretty=%h > gitOutput.txt")
                 gitStatus = readFile('gitOutput.txt').trim()
