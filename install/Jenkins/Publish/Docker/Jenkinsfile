@@ -110,11 +110,11 @@ pipeline {
 
                 sh script: " sed -i \"s/tag:.*\$/tag: " + appVersion + "_${BUILD_NUMBER}_" + gitStatus + "/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/values.yaml"
                 sh script: " sed -i \"s/BLUEGREEN/blue/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/values.yaml"
-                sh script: " sed -i \"s/version:.*\$/version: v1.0.0_${BUILD_NUMBER}/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/Chart.yaml"
+                sh script: " sed -i \"s/version:.*\$/version: " + appVersion + "_${BUILD_NUMBER}_" + gitStatus + "/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/Chart.yaml"
                 sh script: "cd ${WORKSPACE}/install/deploy/helm && helm package " + app.appName
 
                 withCredentials([usernamePassword(credentialsId: 'GIT_CREDENTIALS', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                    sh("git add ${WORKSPACE}/install/deploy/helm/" + app.appName + "-*_${BUILD_NUMBER}.tgz")
+                    sh("git add ${WORKSPACE}/install/deploy/helm/" + app.appName + "-*_${BUILD_NUMBER}_" + gitStatus + ".tgz")
                     sh("git commit -m \"Add udpated tgz package\"")
                     sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@' + getGitURL + ' HEAD' )
                 }
