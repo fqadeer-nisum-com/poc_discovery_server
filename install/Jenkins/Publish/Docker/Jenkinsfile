@@ -27,12 +27,12 @@ pipeline {
             checkout([$class: 'GitSCM',
                       branches: [[name: '/master']],
                       doGenerateSubmoduleConfigurations: false,
-                      extensions: [[$class: 'CleanCheckout']],
+                      extensions: [[$class: 'WipeWorkspace']],
                       submoduleCfg: [],
                       userRemoteConfigs: [[credentialsId:'10dc7c72-ff75-4986-8001-6da6b3a917bb', url: 'https://github.com/nisum-inc/POC_Discovery_Server.git']]
                       //userRemoteConfigs: [[credentialsId: '16e9c02e-8b5a-41de-b05e-5c0ac770dc97', url: 'https://github.com/nisum-inc/POC_Discovery_Server.git']]
-            ])
-        }*/
+            ])*/
+        }
 
     } // end of stage
 
@@ -101,16 +101,47 @@ pipeline {
            }
 
        }
-
     } // end of stage
 
-    stage('Trigger Blue/Green Deployment') {
+    stage('Create And Upload Helm Chart') {
+        agent {
+            label "k8-master"
+        }
+        steps {
+            script {
+                checkout scm
+                //git branch: 'master',
+                //    credentialsId: '10dc7c72-ff75-4986-8001-6da6b3a917bb',
+                //    url: 'https://github.com/nisum-inc/POC_Discovery_Server.git'
+
+                commit = sh (returnStatus: true, script: "git log -1 --pretty=%h > gitOutput.txt")
+                gitStatus = readFile('gitOutput.txt').trim()
+                appVersion = readFile('version').trim()
+
+                getGitURL = sh (returnStatus: true, script: "git config --get remote.origin.url | awk -F':' '{ print \$NF }' | sed 's|//||g' > gitURL.txt")
+                getGitURL = readFile('gitURL.txt').trim()
+
+                sh script: " sed -i \"s/tag:.*\$/tag: " + appVersion + "_${BUILD_NUMBER}_" + gitStatus + "/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/values.yaml"
+                sh script: " sed -i \"s/BLUEGREEN/blue/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/values.yaml"
+                sh script: " sed -i \"s/version:.*\$/version: v1.0.0_${BUILD_NUMBER}/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/Chart.yaml"
+                sh script: "cd ${WORKSPACE}/install/deploy/helm && helm package " + app.appName
+
+                withCredentials([usernamePassword(credentialsId: 'GIT_CREDENTIALS', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                    sh("git add ${WORKSPACE}/install/deploy/helm/" + app.appName + "-*_${BUILD_NUMBER}.tgz")
+                    sh("git commit -m \"Add udpated tgz package\"")
+                    sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@' + getGitURL + ' HEAD' )
+                }
+            }
+        }
+    }
+
+    /*stage('Trigger Blue/Green Deployment') {
 
       steps {
         build job: '/DevOpsPOC_BlueGreen_Deploy_DiscoverySVR'
       }
 
-    }  // end of stage
+    } */ // end of stage
 
   } // end of all stages
 
