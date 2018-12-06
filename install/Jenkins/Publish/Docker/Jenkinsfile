@@ -31,8 +31,8 @@ pipeline {
                       submoduleCfg: [],
                       userRemoteConfigs: [[credentialsId:'10dc7c72-ff75-4986-8001-6da6b3a917bb', url: 'https://github.com/nisum-inc/POC_Discovery_Server.git']]
                       //userRemoteConfigs: [[credentialsId: '16e9c02e-8b5a-41de-b05e-5c0ac770dc97', url: 'https://github.com/nisum-inc/POC_Discovery_Server.git']]
-            ])*/
-        }
+            ])
+        }*/
 
     } // end of stage
 
@@ -126,8 +126,6 @@ pipeline {
           steps {
             build job: '/DevOpsPOC_BlueGreen_Deploy_DiscoverySVR'
           }
-    } */ // end of stage
-
-  } // end of all stages
-
-} // end of pipeline
+    }*/
+  }
+}
