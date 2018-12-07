@@ -90,7 +90,7 @@ pipeline {
        }
     } // end of stage
 
-    stage('Create And Upload Helm Chart') {
+    /*stage('Create And Upload Helm Chart') {
         agent {
             label "k8-master"
         }
@@ -120,7 +120,7 @@ pipeline {
                 }
             }
         }
-    }
+    }*/
 
     /*stage('Trigger Blue/Green Deployment') {
           steps {
