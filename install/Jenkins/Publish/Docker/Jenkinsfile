@@ -100,8 +100,8 @@ pipeline {
 
             gitStatus = readFile('gitOutput.txt').trim()
             appVersion = readFile('version').trim()
-            helmPackagePath = "${WORKSPACE}/install/deploy/helm/" + app.appName + "-" + appVersion + "_${BUILD_NUMBER}_" + gitStatus + ".tgz"
-            helmPackageFilename = app.appName + "-" + appVersion + "_${BUILD_NUMBER}_" + gitStatus + ".tgz"
+            helmPackagePath = "${WORKSPACE}/install/deploy/helm/${app.appName}-${appVersion}_${BUILD_NUMBER}_${gitStatus}.tgz"
+            helmPackageFilename = "${app.appName}-${appVersion}_${BUILD_NUMBER}_${gitStatus}.tgz"
 
         }
 
