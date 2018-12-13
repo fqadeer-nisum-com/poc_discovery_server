@@ -90,6 +90,38 @@ pipeline {
        }
     } // end of stage
 
+    stage('Create and Uplaod Helm Chart') {
+
+        steps {
+
+            script {
+
+                gitStatus = readFile('gitOutput.txt').trim()
+                appVersion = readFile('version').trim()
+
+                sh script: " sed -i \"s/tag:.*\$/tag: " + appVersion + "_${BUILD_NUMBER}_" + gitStatus + "/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/values.yaml"
+                sh script: " sed -i \"s/BLUEGREEN/blue/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/values.yaml"
+                sh script: " sed -i \"s/version:.*\$/version: " + appVersion + "_${BUILD_NUMBER}_" + gitStatus + "/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/Chart.yaml"
+                sh script: "cd ${WORKSPACE}/install/deploy/helm && helm package " + app.appName
+
+                def helmPackagePath = ${WORKSPACE}/install/deploy/helm/" + app.appName + "-*_${BUILD_NUMBER}_" + gitStatus + ".tgz"
+                def helmPackageFilename = app.appName + "-*_${BUILD_NUMBER}_" + gitStatus + ".tgz"
+
+            }
+
+
+            withAWS(endpointUrl:'http://216.218.200.242:9000',credentials:'a5e98678-a256-43db-8287-7ab0c43499c0',federatedUserId:"${submitter}@${releaseVersion}") {
+
+                s3Upload(file:${helmPackageFilename}, bucket:'discovery-server', path:${helmPackagePath})
+
+            }
+
+        }
+
+    } // end of stage
+
+
+
     /*stage('Create And Upload Helm Chart') {
         agent {
             label "k8-master"
