@@ -98,6 +98,7 @@ pipeline {
 
         environment {
 
+            commit = sh (returnStatus: true, script: "git log -1 --pretty=%h > gitOutput.txt")
             gitStatus = readFile('gitOutput.txt').trim()
             appVersion = readFile('version').trim()
             helmPackagePath = "${WORKSPACE}/install/deploy/helm/${app.appName}-${appVersion}_${BUILD_NUMBER}_${gitStatus}.tgz"
