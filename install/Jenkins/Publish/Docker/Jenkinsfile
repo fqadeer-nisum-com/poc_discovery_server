@@ -92,6 +92,10 @@ pipeline {
 
     stage('Create and Uplaod Helm Chart') {
 
+        agent {
+            label "k8-master"
+        }
+
         steps {
 
             script {
