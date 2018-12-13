@@ -104,8 +104,8 @@ pipeline {
                 sh script: " sed -i \"s/version:.*\$/version: " + appVersion + "_${BUILD_NUMBER}_" + gitStatus + "/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/Chart.yaml"
                 sh script: "cd ${WORKSPACE}/install/deploy/helm && helm package " + app.appName
 
-                def helmPackagePath = ${WORKSPACE}/install/deploy/helm/" + app.appName + "-*_${BUILD_NUMBER}_" + gitStatus + ".tgz"
-                def helmPackageFilename = app.appName + "-*_${BUILD_NUMBER}_" + gitStatus + ".tgz"
+                def helmPackagePath = ${WORKSPACE}/install/deploy/helm/" + app.appName + "-" + appVersion + "_${BUILD_NUMBER}_" + gitStatus + ".tgz"
+                def helmPackageFilename = app.appName + "-" + appVersion + "_${BUILD_NUMBER}_" + gitStatus + ".tgz"
 
             }
 
