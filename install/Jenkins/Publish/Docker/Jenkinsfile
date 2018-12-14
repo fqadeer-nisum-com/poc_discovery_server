@@ -1,4 +1,5 @@
 def app = [appName: 'discovery-server',   appPort: '7001']
+def HELM_CHART_FILE = ''
 
 pipeline {
 
@@ -122,6 +123,8 @@ pipeline {
 
                 HELM_CHART_FILE = "${app.appName}-${appVersion}_${BUILD_NUMBER}_${gitStatus}.tgz"
 
+                sh script: "echo ${HELM_CHART_FILE}"
+
 
              }
         }
@@ -147,6 +150,8 @@ pipeline {
                 dir("${WORKSPACE}/helm-charts/discovery-server/") {
                 unstash "helmChartPackage_Stash"
                 }
+
+                sh script: "echo ${HELM_CHART_FILE}"
 
                 withCredentials([usernamePassword(credentialsId: 'GIT_CREDENTIALS', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                 sh("git add ${WORKSPACE}/helm-charts/discovery-server/${HELM_CHART_FILE}")
