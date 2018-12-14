@@ -155,7 +155,7 @@ pipeline {
 
                 withCredentials([usernamePassword(credentialsId: 'GIT_CREDENTIALS', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                 sh("git config --global user.email fqadeer@nisum.com")
-                sh("git config --global user.name "Fahad Qadeer")
+                sh("git config --global user.name \"Fahad Qadeer\"")
                 sh("git add ${WORKSPACE}/helm-charts/discovery-server/${HELM_CHART_FILE}")
                 sh("git commit -m \"Add udpated tgz package\"")
                 sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@' + getGitURL + ' HEAD' )
