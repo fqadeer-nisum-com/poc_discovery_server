@@ -189,16 +189,16 @@ pipeline {
 
    }
 
-
-   post {
+    post {
            always {
 
                dir("${WORKSPACE}") {
                    unstash "propertiesFile_Stash"
                    archiveArtifacts artifacts: 'properties.yaml', onlyIfSuccessful: true
                }
-
            }
+
+    }
 
 
 
