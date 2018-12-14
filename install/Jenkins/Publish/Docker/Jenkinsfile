@@ -88,6 +88,16 @@ pipeline {
                     /* logging out docker account */
                     sh "docker logout"
                }
+
+               dir("${WORKSPACE}") {
+                   sh script: "echo application: ${app.appName} >> properties.yaml"
+                   sh script: "echo version: ${appVersion} >> properties.yaml"
+                   sh script: "echo git_commit_hash: ${gitStatus} >> properties.yaml"
+                   sh script: "echo docker_hub_image: " + env.registry + "/" + app.appName.replaceAll("-", "_") + ":" + appVersion + "_${BUILD_NUMBER}_" + gitStatus + " >> properties.yaml"
+
+                   stash includes: "properties.yaml", name: 'propertiesFile_Stash'
+               }
+
            }
        }
     } // end of stage
@@ -123,8 +133,11 @@ pipeline {
 
                 HELM_CHART_FILE = "${app.appName}-${appVersion}_${BUILD_NUMBER}_${gitStatus}.tgz"
 
-                sh script: "echo ${HELM_CHART_FILE}"
-
+                dir("${WORKSPACE}") {
+                    unstash "propertiesFile_Stash"
+                    sh script: "echo helm_chart_file: ${HELM_CHART_FILE} >> properties.yaml"
+                    stash includes: "properties.yaml", name: 'propertiesFile_Stash'
+                }
 
              }
         }
@@ -151,8 +164,6 @@ pipeline {
                 unstash "helmChartPackage_Stash"
                 }
 
-                sh script: "echo ${HELM_CHART_FILE}"
-
                 withCredentials([usernamePassword(credentialsId: 'GIT_CREDENTIALS', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                 sh("git config --global user.email fqadeer@nisum.com")
                 sh("git config --global user.name \"Fahad Qadeer\"")
@@ -175,6 +186,20 @@ pipeline {
           }
     }*/
 
+
    }
+
+
+   post {
+           always {
+
+               dir("${WORKSPACE}") {
+                   unstash "propertiesFile_Stash"
+                   archiveArtifacts artifacts: 'properties.yaml', onlyIfSuccessful: true
+               }
+
+           }
+
+
 
 }
