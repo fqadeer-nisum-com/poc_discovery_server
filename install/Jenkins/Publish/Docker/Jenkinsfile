@@ -1,4 +1,5 @@
 def app = [appName: 'discovery-server',   appPort: '7001']
+def commitHashFile = sh (returnStatus: true, script: "git log -1 --pretty=%h > commitHashFile.txt")
 
 pipeline {
 
@@ -90,67 +91,24 @@ pipeline {
        }
     } // end of stage
 
-    stage('Create and Uplaod Helm Chart') {
+
+    stage('Create And Upload Helm Chart') {
 
         agent {
             label "k8-master"
-        }
-
-        environment {
-
-            commit = sh (returnStatus: true, script: "git log -1 --pretty=%h > gitOutput.txt")
-            gitStatus = readFile('gitOutput.txt').trim()
-            appVersion = readFile('version').trim()
-            helmPackagePath = "${WORKSPACE}/install/deploy/helm/${app.appName}-${appVersion}_${BUILD_NUMBER}_${gitStatus}.tgz"
-            helmPackageFilename = "${app.appName}-${appVersion}_${BUILD_NUMBER}_${gitStatus}.tgz"
-
         }
 
         steps {
 
             script {
 
-                // gitStatus = readFile('gitOutput.txt').trim()
-                // appVersion = readFile('version').trim()
-
-                sh script: " sed -i \"s/tag:.*\$/tag: " + appVersion + "_${BUILD_NUMBER}_" + gitStatus + "/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/values.yaml"
-                sh script: " sed -i \"s/BLUEGREEN/blue/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/values.yaml"
-                sh script: " sed -i \"s/version:.*\$/version: " + appVersion + "_${BUILD_NUMBER}_" + gitStatus + "/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/Chart.yaml"
-                sh script: "cd ${WORKSPACE}/install/deploy/helm && helm package " + app.appName
-
-                // helmPackagePath = "${WORKSPACE}/install/deploy/helm/" + app.appName + "-" + appVersion + "_${BUILD_NUMBER}_" + gitStatus + ".tgz"
-                // helmPackageFilename = app.appName + "-" + appVersion + "_${BUILD_NUMBER}_" + gitStatus + ".tgz"
-
-            }
-
-            sh 'echo $helmPackagePath'
-            sh 'echo $helmPackageFilename'
-
-            withAWS(endpointUrl:'http://216.218.200.242:9000',credentials:'a5e98678-a256-43db-8287-7ab0c43499c0') {
-
-                s3Upload(file:"${helmPackagePath}", bucket:'discovery-server', path:"${helmPackageFilename}")
-
-            }
-
-        }
-
-    } // end of stage
-
-
-
-    /*stage('Create And Upload Helm Chart') {
-        agent {
-            label "k8-master"
-        }
-        steps {
-            script {
                 //checkout scm
                 git branch: 'master',
                     credentialsId: '10dc7c72-ff75-4986-8001-6da6b3a917bb',
-                    url: 'https://github.com/nisum-inc/POC_Discovery_Server.git'
+                    url: 'https://github.com/nisum-inc/DevOpsPOC.git'
 
-                commit = sh (returnStatus: true, script: "git log -1 --pretty=%h > gitOutput.txt")
-                gitStatus = readFile('gitOutput.txt').trim()
+                // commit = sh (returnStatus: true, script: "git log -1 --pretty=%h > gitOutput.txt")
+                gitStatus = readFile('commitHashOutput.txt').trim()
                 appVersion = readFile('version').trim()
 
                 getGitURL = sh (returnStatus: true, script: "git config --get remote.origin.url | awk -F':' '{ print \$NF }' | sed 's|//||g' > gitURL.txt")
@@ -168,7 +126,7 @@ pipeline {
                 }
             }
         }
-    }*/
+    } // end of stage
 
     /*stage('Trigger Blue/Green Deployment') {
           steps {
