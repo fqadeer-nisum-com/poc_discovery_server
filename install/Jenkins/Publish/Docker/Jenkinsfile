@@ -121,11 +121,10 @@ pipeline {
                 env.HELM_CHART_FILE = "${app.appName}-${appVersion}_${BUILD_NUMBER}_${gitStatus}.tgz"
 
 
-                }
-            }
+             }
         }
 
-    } // end of stage
+     } // end of stage
 
     stage('Publish Helm Chart to GitHub Repo') {
 
