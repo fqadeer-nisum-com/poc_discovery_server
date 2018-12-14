@@ -7,7 +7,7 @@ pipeline {
       registry = "nisumpk"
       registryCredential = 'docker-hub-credentials'
       dockerHost = 'localhost'
-      HELM_CHART_FILE = ''
+      // HELM_CHART_FILE = ''
   }
   
   agent any
@@ -120,7 +120,7 @@ pipeline {
                 stash includes: "${app.appName}-${appVersion}_${BUILD_NUMBER}_${gitStatus}.tgz", name: 'helmChartPackage_Stash'
                 }
 
-                env.HELM_CHART_FILE = "${app.appName}-${appVersion}_${BUILD_NUMBER}_${gitStatus}.tgz"
+                HELM_CHART_FILE = "${app.appName}-${appVersion}_${BUILD_NUMBER}_${gitStatus}.tgz"
 
 
              }
@@ -144,18 +144,12 @@ pipeline {
                 getGitURL = sh (returnStatus: true, script: "git config --get remote.origin.url | awk -F':' '{ print \$NF }' | sed 's|//||g' > gitURL.txt")
                 getGitURL = readFile('gitURL.txt').trim()
 
-            }
-
-            dir("${WORKSPACE}/helm-charts/discovery-server/") {
-
-              unstash "helmChartPackage_Stash"
-
-            }
-
-            script {
+                dir("${WORKSPACE}/helm-charts/discovery-server/") {
+                unstash "helmChartPackage_Stash"
+                }
 
                 withCredentials([usernamePassword(credentialsId: 'GIT_CREDENTIALS', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                sh("git add ${WORKSPACE}/helm-charts/discovery-server/${env.HELM_CHART_FILE}")
+                sh("git add ${WORKSPACE}/helm-charts/discovery-server/${HELM_CHART_FILE}")
                 sh("git commit -m \"Add udpated tgz package\"")
                 sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@' + getGitURL + ' HEAD' )
                 }
