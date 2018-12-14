@@ -4,9 +4,10 @@ pipeline {
 
   /* Environment variables related to docker hub */
   environment {
-    registry = "nisumpk"
-    registryCredential = 'docker-hub-credentials'
-    dockerHost = 'localhost'
+      registry = "nisumpk"
+      registryCredential = 'docker-hub-credentials'
+      dockerHost = 'localhost'
+      HELM_CHART_FILE = ''
   }
   
   agent any
@@ -91,7 +92,7 @@ pipeline {
     } // end of stage
 
 
-    stage('Create And Upload Helm Chart') {
+    stage('Create Helm Chart') {
 
         agent {
             label "k8-master"
@@ -101,32 +102,69 @@ pipeline {
 
             script {
 
-                commit = sh (returnStatus: true, script: "git log -1 --pretty=%h > gitOutput.txt")
-                gitStatus = readFile('gitOutput.txt').trim()
-                appVersion = readFile('version').trim()
-
                 //checkout scm
                 git branch: 'master',
                     credentialsId: '10dc7c72-ff75-4986-8001-6da6b3a917bb',
-                    url: 'https://github.com/nisum-inc/DevOpsPOC.git'
+                    url: 'https://github.com/nisum-inc/POC_Discovery_Server.git'
 
-
-                getGitURL = sh (returnStatus: true, script: "git config --get remote.origin.url | awk -F':' '{ print \$NF }' | sed 's|//||g' > gitURL.txt")
-                getGitURL = readFile('gitURL.txt').trim()
+                // commit = sh (returnStatus: true, script: "git log -1 --pretty=%h > gitOutput.txt")
+                gitStatus = readFile('commitHashOutput.txt').trim()
+                appVersion = readFile('version').trim()
 
                 sh script: " sed -i \"s/tag:.*\$/tag: " + appVersion + "_${BUILD_NUMBER}_" + gitStatus + "/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/values.yaml"
                 sh script: " sed -i \"s/BLUEGREEN/blue/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/values.yaml"
                 sh script: " sed -i \"s/version:.*\$/version: " + appVersion + "_${BUILD_NUMBER}_" + gitStatus + "/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/Chart.yaml"
                 sh script: "cd ${WORKSPACE}/install/deploy/helm && helm package " + app.appName
 
-                withCredentials([usernamePassword(credentialsId: 'GIT_CREDENTIALS', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                    sh("git add ${WORKSPACE}/install/deploy/helm/" + app.appName + "-*_${BUILD_NUMBER}_" + gitStatus + ".tgz")
-                    sh("git commit -m \"Add udpated tgz package\"")
-                    sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@' + getGitURL + ' HEAD' )
+                stash includes: "${WORKSPACE}/install/deploy/helm/${app.appName}-${appVersion}_${BUILD_NUMBER}_${gitStatus}.tgz", name: 'helmChartPackage_Stash'
+
+                env.HELM_CHART_FILE = "${app.appName}-${appVersion}_${BUILD_NUMBER}_${gitStatus}.tgz"
+
+
                 }
             }
         }
+
     } // end of stage
+
+    stage('Publish Helm Chart to GitHub Repo') {
+
+        steps {
+
+            script {
+
+                //checkout scm
+                git branch: 'master',
+                credentialsId: '10dc7c72-ff75-4986-8001-6da6b3a917bb',
+                url: 'https://github.com/nisum-inc/DevOpsPOC.git'
+
+                sh script: "mkdir -p ${WORKSPACE}/helm-charts/discovery-server/"
+
+                getGitURL = sh (returnStatus: true, script: "git config --get remote.origin.url | awk -F':' '{ print \$NF }' | sed 's|//||g' > gitURL.txt")
+                getGitURL = readFile('gitURL.txt').trim()
+
+            }
+
+            dir("${WORKSPACE}/helm-charts/discovery-server/") {
+
+              unstash "helmChartPackage_Stash"
+
+            }
+
+            script {
+
+                withCredentials([usernamePassword(credentialsId: 'GIT_CREDENTIALS', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                sh("git add ${WORKSPACE}/helm-charts/discovery-server/${env.HELM_CHART_FILE}")
+                sh("git commit -m \"Add udpated tgz package\"")
+                sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@' + getGitURL + ' HEAD' )
+
+            }
+
+        }
+
+    } // end of stage
+
+
 
     /*stage('Trigger Blue/Green Deployment') {
           steps {
