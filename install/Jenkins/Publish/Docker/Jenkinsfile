@@ -108,7 +108,7 @@ pipeline {
                     url: 'https://github.com/nisum-inc/POC_Discovery_Server.git'
 
                 // commit = sh (returnStatus: true, script: "git log -1 --pretty=%h > gitOutput.txt")
-                gitStatus = readFile('commitHashOutput.txt').trim()
+                gitStatus = readFile('gitOutput.txt').trim()
                 appVersion = readFile('version').trim()
 
                 sh script: " sed -i \"s/tag:.*\$/tag: " + appVersion + "_${BUILD_NUMBER}_" + gitStatus + "/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/values.yaml"
