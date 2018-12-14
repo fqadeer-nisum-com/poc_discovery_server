@@ -116,7 +116,9 @@ pipeline {
                 sh script: " sed -i \"s/version:.*\$/version: " + appVersion + "_${BUILD_NUMBER}_" + gitStatus + "/g\" ${WORKSPACE}/install/deploy/helm/" + app.appName + "/Chart.yaml"
                 sh script: "cd ${WORKSPACE}/install/deploy/helm && helm package " + app.appName
 
-                stash includes: "${WORKSPACE}/install/deploy/helm/${app.appName}-${appVersion}_${BUILD_NUMBER}_${gitStatus}.tgz", name: 'helmChartPackage_Stash'
+                dir("${WORKSPACE}/install/deploy/helm/") {
+                stash includes: "${app.appName}-${appVersion}_${BUILD_NUMBER}_${gitStatus}.tgz", name: 'helmChartPackage_Stash'
+                }
 
                 env.HELM_CHART_FILE = "${app.appName}-${appVersion}_${BUILD_NUMBER}_${gitStatus}.tgz"
 
