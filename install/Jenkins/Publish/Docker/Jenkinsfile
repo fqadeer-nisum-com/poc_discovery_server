@@ -156,12 +156,13 @@ pipeline {
                 sh("git add ${WORKSPACE}/helm-charts/discovery-server/${env.HELM_CHART_FILE}")
                 sh("git commit -m \"Add udpated tgz package\"")
                 sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@' + getGitURL + ' HEAD' )
+                }
 
-            }
+             }
 
-        }
+         }
 
-    } // end of stage
+     } // end of stage
 
 
 
@@ -170,5 +171,7 @@ pipeline {
             build job: '/DevOpsPOC_BlueGreen_Deploy_DiscoverySVR'
           }
     }*/
-  }
+
+   }
+
 }
