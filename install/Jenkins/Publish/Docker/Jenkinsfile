@@ -1,5 +1,4 @@
 def app = [appName: 'discovery-server',   appPort: '7001']
-def commitHashFile = sh (returnStatus: true, script: "git log -1 --pretty=%h > commitHashFile.txt")
 
 pipeline {
 
@@ -102,14 +101,15 @@ pipeline {
 
             script {
 
+                commit = sh (returnStatus: true, script: "git log -1 --pretty=%h > gitOutput.txt")
+                gitStatus = readFile('commitHashOutput.txt').trim()
+                appVersion = readFile('version').trim()
+
                 //checkout scm
                 git branch: 'master',
                     credentialsId: '10dc7c72-ff75-4986-8001-6da6b3a917bb',
                     url: 'https://github.com/nisum-inc/DevOpsPOC.git'
 
-                // commit = sh (returnStatus: true, script: "git log -1 --pretty=%h > gitOutput.txt")
-                gitStatus = readFile('commitHashOutput.txt').trim()
-                appVersion = readFile('version').trim()
 
                 getGitURL = sh (returnStatus: true, script: "git config --get remote.origin.url | awk -F':' '{ print \$NF }' | sed 's|//||g' > gitURL.txt")
                 getGitURL = readFile('gitURL.txt').trim()
