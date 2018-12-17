@@ -90,7 +90,7 @@ pipeline {
                }
 
                dir("${WORKSPACE}") {
-                   sh script: "echo application: ${app.appName} >> properties.yaml"
+                   sh script: "echo application: ${app.appName} > properties.yaml"
                    sh script: "echo version: ${appVersion} >> properties.yaml"
                    sh script: "echo git_commit_hash: ${gitStatus} >> properties.yaml"
                    sh script: "echo docker_hub_image: " + env.registry + "/" + app.appName.replaceAll("-", "_") + ":" + appVersion + "_${BUILD_NUMBER}_" + gitStatus + " >> properties.yaml"
