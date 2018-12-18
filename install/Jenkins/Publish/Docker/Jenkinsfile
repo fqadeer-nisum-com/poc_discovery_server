@@ -8,7 +8,6 @@ pipeline {
       registry = "nisumpk"
       registryCredential = 'docker-hub-credentials'
       dockerHost = 'localhost'
-      // HELM_CHART_FILE = ''
   }
   
   agent any
@@ -113,12 +112,9 @@ pipeline {
 
             script {
 
-                //checkout scm
-                git branch: 'master',
-                    credentialsId: '10dc7c72-ff75-4986-8001-6da6b3a917bb',
-                    url: 'https://github.com/nisum-inc/POC_Discovery_Server.git'
+                checkout scm
 
-                // commit = sh (returnStatus: true, script: "git log -1 --pretty=%h > gitOutput.txt")
+                commit = sh (returnStatus: true, script: "git log -1 --pretty=%h > gitOutput.txt")
                 gitStatus = readFile('gitOutput.txt').trim()
                 appVersion = readFile('version').trim()
 
@@ -150,24 +146,23 @@ pipeline {
 
             script {
 
-                //checkout scm
                 git branch: 'master',
                 credentialsId: '10dc7c72-ff75-4986-8001-6da6b3a917bb',
                 url: 'https://github.com/nisum-inc/DevOpsPOC.git'
 
-                sh script: "mkdir -p ${WORKSPACE}/helm-charts/discovery-server/"
+                sh script: "mkdir -p ${WORKSPACE}/helm-charts/${app.appName}/"
 
                 getGitURL = sh (returnStatus: true, script: "git config --get remote.origin.url | awk -F':' '{ print \$NF }' | sed 's|//||g' > gitURL.txt")
                 getGitURL = readFile('gitURL.txt').trim()
 
-                dir("${WORKSPACE}/helm-charts/discovery-server/") {
+                dir("${WORKSPACE}/helm-charts/${app.appName}/") {
                 unstash "helmChartPackage_Stash"
                 }
 
                 withCredentials([usernamePassword(credentialsId: 'GIT_CREDENTIALS', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                 sh("git config --global user.email fqadeer@nisum.com")
                 sh("git config --global user.name \"Fahad Qadeer\"")
-                sh("git add ${WORKSPACE}/helm-charts/discovery-server/${HELM_CHART_FILE}")
+                sh("git add ${WORKSPACE}/helm-charts/${app.appName}/${HELM_CHART_FILE}")
                 sh("git commit -m \"Add udpated tgz package\"")
                 sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@' + getGitURL + ' HEAD' )
                 }
